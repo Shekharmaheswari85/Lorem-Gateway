@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: lorem-gateway
+  profiles:
+    active: local
+  r2dbc:
+    url: r2dbc:h2:mem:///testdb
+    username: sa
+    password: 
+    driver: h2
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-256-bit-secret}
+      expiration-in-ms: ${JWT_EXPIRATION_IN_MS:86400000} # 24 hours
+
+logging:
+  level:
+    root: INFO
+    com.example.graphqldemo: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.springframework.graphql: DEBUG
+    org.springframework.data.r2dbc: DEBUG
+
+graphql:
+  servlet:
+    mapping: /graphql
+    enabled: true
+    corsEnabled: true
+  playground:
+    enabled: true
+    mapping: /graphiql
+    settings:
+      editor.theme: light
+      editor.reuseHeaders: true
+      schema.polling.enable: false
+  graphiql:
+    enabled: true
+    path: /graphiql
+  schema:
+    printer:
+      enabled: true 

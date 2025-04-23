@@ -1,18 +1,349 @@
-type Book {
+scalar DateTime
+scalar JSON
+scalar Upload
+
+type User {
     id: ID!
-    title: String!
-    author: String!
-    pageCount: Int
+    email: String!
+    name: String!
+    accessType: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    cars: [Car!]
+}
+
+type Car {
+    id: ID!
+    userId: ID!
+    vin: String!
+    make: String!
+    model: String!
+    year: Int!
+    mileage: Float!
+    mileageUnit: String!
+    color: String!
+    registrationNumber: String!
+    manufactureDate: DateTime!
+    purchaseDate: DateTime!
+    sellerName: String
+    listingPlatforms: [String!]
+    listingLinks: JSON
+    listingDates: JSON
+    documents: JSON
+    status: CarStatus!
+    hasLoan: Boolean!
+    loanDetails: JSON
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    owner: OwnershipDetails
+    loan: LoanDetails
+    transactions: [Transaction!]
+    currentOwner: OwnershipDetails
+}
+
+enum CarStatus {
+    AVAILABLE
+    SOLD
+    UNDER_MAINTENANCE
+}
+
+type OwnershipDetails {
+    id: ID!
+    carId: ID!
+    ownerName: String!
+    aadhaarNumber: String!
+    panNumber: String!
+    drivingLicense: String!
+    phoneNumber: String!
+    location: String!
+    documents: JSON
+    isCurrentOwner: Boolean!
+    ownershipStartDate: DateTime!
+    ownershipEndDate: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type LoanDetails {
+    id: ID!
+    carId: ID!
+    bankName: String!
+    loanAmount: Float!
+    loanStatus: LoanStatus!
+    emiAmount: Float
+    tenure: Int
+    interestRate: Float
+    startDate: DateTime!
+    endDate: DateTime
+    documents: JSON
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    transactions: [Transaction!]
+}
+
+type Broker {
+    id: ID!
+    name: String!
+    phoneNumber: String!
+    commission: Float
+    specialization: [BrokerSpecialization!]
+    rating: Float
+    totalDeals: Int
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    transactions: [Transaction!]
+    fees: [BrokerFee!]
+}
+
+enum BrokerSpecialization {
+    SALES
+    PURCHASE
+    LOAN_PROCESSING
+    INSURANCE
+}
+
+type Transaction {
+    id: ID!
+    carId: ID!
+    brokerId: ID
+    transactionType: TransactionType!
+    paymentMethod: PaymentMethod!
+    amount: Float!
+    transactionId: String
+    bankDetails: JSON
+    notes: String
+    status: TransactionStatus!
+    documents: [String!]
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    broker: Broker
+    brokerFee: BrokerFee
+}
+
+type BrokerFee {
+    id: ID!
+    brokerId: ID!
+    transactionId: ID!
+    feeAmount: Float!
+    paymentStatus: PaymentStatus!
+    paymentDate: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    broker: Broker!
+    transaction: Transaction!
+}
+
+enum TransactionType {
+    SALE
+    PURCHASE
+    LOAN_PAYMENT
+    MAINTENANCE
+    INSURANCE
+}
+
+enum PaymentMethod {
+    CASH
+    UPI
+    BANK_TRANSFER
+    FINANCE
+    CHEQUE
+}
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    CANCELLED
+}
+
+enum TransactionStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum LoanStatus {
+    PENDING
+    ACTIVE
+    CLEARED
+    DEFAULTED
+}
+
+input CreateCarInput {
+    name: String!
+    registrationNumber: String!
+    manufactureDate: DateTime!
+    purchaseDate: DateTime!
+    sellerName: String
+    listingPlatforms: [String!]
+    documents: Upload
+}
+
+input CreateOwnershipInput {
+    carId: ID!
+    ownerName: String!
+    aadhaarNumber: String!
+    panNumber: String!
+    drivingLicense: String!
+    phoneNumber: String!
+    location: String!
+    documents: JSON!
+    ownershipStartDate: DateTime!
+}
+
+input CreateLoanInput {
+    carId: ID!
+    bankName: String!
+    loanAmount: Float!
+    emiAmount: Float!
+    tenure: Int!
+    interestRate: Float!
+    startDate: DateTime!
+    documents: Upload
+}
+
+input CreateTransactionInput {
+    carId: ID!
+    brokerId: ID
+    transactionType: TransactionType!
+    paymentMethod: PaymentMethod!
+    amount: Float!
+    bankDetails: JSON
+    documents: [Upload!]
+    notes: String
+}
+
+input CreateBrokerInput {
+    name: String!
+    phoneNumber: String!
+    commission: Float
+    specialization: [BrokerSpecialization!]
 }
 
 type Query {
-    books: [Book!]!
-    book(id: ID!): Book
-    booksByAuthor(author: String!): [Book!]!
+    me: User
+    car(id: ID!): Car
+    cars(
+        status: CarStatus
+        ownerId: ID
+        search: String
+        limit: Int
+        offset: Int
+    ): [Car!]!
+    
+    broker(id: ID!): Broker
+    brokers(
+        specialization: BrokerSpecialization
+        search: String
+        limit: Int
+        offset: Int
+    ): [Broker!]!
+    
+    transaction(id: ID!): Transaction
+    transactions(
+        carId: ID
+        brokerId: ID
+        type: TransactionType
+        status: TransactionStatus
+        fromDate: DateTime
+        toDate: DateTime
+        limit: Int
+        offset: Int
+    ): [Transaction!]!
+    
+    carTransactions(carId: ID!): [Transaction!]!
+    brokerTransactions(brokerId: ID!): [Transaction!]!
+    
+    carOwnershipHistory(carId: ID!): [OwnershipDetails!]!
+    carLoanHistory(carId: ID!): [LoanDetails!]!
+    
+    ledgerEntries(
+        userId: ID
+        entityType: String
+        entityId: ID
+        actionType: String
+        fromDate: DateTime
+        toDate: DateTime
+    ): [LedgerEntry!]!
 }
 
 type Mutation {
-    addBook(title: String!, author: String!, pageCount: Int): Book!
-    updateBook(id: ID!, title: String!, author: String!, pageCount: Int): Book!
-    deleteBook(id: ID!): Boolean!
+    # Car Management
+    createCar(input: CreateCarInput!): Car!
+    updateCarStatus(id: ID!, status: CarStatus!): Car!
+    deleteCar(id: ID!): Boolean!
+
+    # Ownership Management
+    createOwnership(input: CreateOwnershipInput!): OwnershipDetails!
+    transferOwnership(
+        carId: ID!
+        newOwnerInput: CreateOwnershipInput!
+    ): OwnershipDetails!
+
+    # Loan Management
+    createLoan(input: CreateLoanInput!): LoanDetails!
+    updateLoanStatus(id: ID!, status: LoanStatus!): LoanDetails!
+    recordLoanPayment(
+        loanId: ID!
+        amount: Float!
+        paymentDate: DateTime!
+    ): Transaction!
+
+    # Broker Management
+    createBroker(input: CreateBrokerInput!): Broker!
+    updateBrokerRating(id: ID!, rating: Float!): Broker!
+
+    # Transaction Management
+    createTransaction(input: CreateTransactionInput!): Transaction!
+    updateTransactionStatus(id: ID!, status: TransactionStatus!): Transaction!
+    cancelTransaction(id: ID!, reason: String!): Transaction!
+    
+    # Broker Fee Management
+    recordBrokerFee(
+        brokerId: ID!
+        transactionId: ID!
+        amount: Float!
+    ): BrokerFee!
+    updateBrokerFeeStatus(
+        id: ID!
+        status: PaymentStatus!
+        paymentDate: DateTime
+    ): BrokerFee!
+    
+    recordLedgerEntry(
+        userId: ID!
+        actionType: String!
+        entityType: String!
+        entityId: ID!
+        details: JSON!
+        ipAddress: String
+        userAgent: String
+    ): LedgerEntry!
+
+    login(email: String!, password: String!): AuthPayload
+    register(email: String!, password: String!, name: String!): AuthPayload
+}
+
+type Subscription {
+    transactionUpdated(carId: ID): Transaction!
+    loanStatusUpdated(carId: ID): LoanDetails!
+    ownershipTransferred(carId: ID): OwnershipDetails!
+    brokerFeeUpdated(brokerId: ID): BrokerFee!
+}
+
+type LedgerEntry {
+    id: ID!
+    userId: ID!
+    actionType: String!
+    entityType: String!
+    entityId: ID!
+    details: JSON!
+    ipAddress: String
+    userAgent: String
+    createdAt: DateTime!
+}
+
+type AuthPayload {
+    token: String!
+    user: User!
 } 

@@ -1,4 +1,4 @@
-package com.example.graphqldemo.config;
+package com.example.classic.config;
 
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;

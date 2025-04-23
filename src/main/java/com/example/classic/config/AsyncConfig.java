@@ -1,4 +1,4 @@
-package com.example.graphqldemo.config;
+package com.example.classic.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

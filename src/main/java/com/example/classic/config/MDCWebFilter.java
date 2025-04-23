@@ -1,4 +1,4 @@
-package com.example.graphqldemo.config;
+package com.example.classic.config;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -32,6 +32,6 @@ public class MDCWebFilter implements WebFilter {
         );
 
         return chain.filter(exchange)
-                .contextWrite(MDCContextLifter.withContext(contextMap));
+                .contextWrite(context -> context.put("MDC_CONTEXT", contextMap));
     }
 } 

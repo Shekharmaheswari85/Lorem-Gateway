@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: lorem-gateway
+  profiles:
+    active: dev
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/lorem_gateway
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver: postgresql
+  security:
+    jwt:
+      secret: ${JWT_SECRET:dev-secret-key-123}
+      expiration-in-ms: ${JWT_EXPIRATION_IN_MS:86400000} # 24 hours
+
+logging:
+  level:
+    root: INFO
+    com.example.graphqldemo: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.springframework.graphql: DEBUG
+    org.springframework.data.r2dbc: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+graphql:
+  servlet:
+    mapping: /graphql
+    enabled: true
+    corsEnabled: true
+  playground:
+    enabled: true
+    mapping: /graphiql
+    settings:
+      editor.theme: light
+      editor.reuseHeaders: true
+      schema.polling.enable: true
+  graphiql:
+    enabled: true
+    path: /graphiql
+  schema:
+    printer:
+      enabled: true 
